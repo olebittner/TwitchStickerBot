@@ -1,0 +1,36 @@
+stages:
+  - deploy
+
+deploy production:
+  stage: deploy
+  only:
+    - master@obittner/TwitchStickerBot
+    - web
+    - triggers
+    - schedules
+  environment:
+    name: production
+    url: https://t.me/TwitchStickersBot
+  variables:
+    path: '/opt/telegram/TwitchStickerBot'
+    venv: '/opt/telegram/TwitchStickerBot/venv'
+    python: '$venv/bin/python'
+
+  script:
+    - "python3 -m venv --clear $venv"
+    - "$python -m pip install --upgrade pip"
+    - "$python -m pip install -r ./requirements.txt"
+    - "chgrp -hR telegram $venv"
+    - "chgrp -hR telegram ./"
+    - "rsync -rvl --exclude='.git/'
+                  --exclude='.gitlab-ci.yml'
+                  --exclude='.gitignore'
+                  --exclude='README.md'
+                  --exclude='venv/'
+                  --exclude='requirements.txt'
+                  --exclude='config.ini'
+                  --delete
+                  --chmod=775
+                  --group
+          ./ $path"
+    - "sudo /bin/systemctl start twitchstickerbot.service"
