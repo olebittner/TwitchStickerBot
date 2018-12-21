@@ -2,8 +2,7 @@ import sys
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram import Sticker
 import logging
-import twitch_emotes
-from Utils import telegram_util
+from Utils import telegram_util, twitch_util
 
 
 class TwitchStickersBot:
@@ -14,7 +13,7 @@ class TwitchStickersBot:
         self.dispatcher.add_handler(CommandHandler('start', self.__handle_start))
         self.dispatcher.add_handler(MessageHandler(Filters.text, self.__handle_message))
 
-        self.twitch_emotes = twitch_emotes.TwitchEmoteRequester()
+        self.twitch_emotes = twitch_util.TwitchEmoteRequester()
 
     def __handle_start(self, bot, update):
         bot.send_message(chat_id=update.message.chat_id, text=f"I'm a bot, please talk to me!")
