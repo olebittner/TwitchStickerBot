@@ -25,3 +25,11 @@ emoji_digits = [Emoji.digit_zero.value,
                 Emoji.digit_seven.value,
                 Emoji.digit_eight.value,
                 Emoji.digit_nine.value]
+
+
+def parse_number_to_emoji(number):
+    number_str = str(number)
+    emoji_str = ''
+    for digit in number_str:
+        emoji_str += emoji_digits[int(digit)]
+    return emoji_str
