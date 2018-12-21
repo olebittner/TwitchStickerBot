@@ -20,9 +20,10 @@ class TwitchEmoteRequester:
         return False
 
     def get_twitch_emotes(self, channel_name):
+        channel_name = channel_name.casefold()
         self.update_json_cache()
         for channel, details in self.cache.items():
-            if details['channel_name'] == channel_name:
+            if details['channel_name'].casefold() == channel_name or details['display_name'].casefold() == channel_name:
                 emotes = list()
                 for emote in details['emotes']:
                     emotes.append(f"https://static-cdn.jtvnw.net/emoticons/v1/{emote['id']}/3.0")
