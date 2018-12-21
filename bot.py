@@ -1,4 +1,4 @@
-import sys
+import signal
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram import Sticker
 import logging
@@ -7,6 +7,9 @@ from Utils import telegram_util, twitch_util, config_util
 
 class TwitchStickersBot:
     def __init__(self, token):
+        signal.signal(signal.SIGINT, self.__soft_exit)
+        signal.signal(signal.SIGTERM, self.__soft_exit)
+
         self.updater = Updater(token=token)
         self.dispatcher = self.updater.dispatcher
 
@@ -40,16 +43,24 @@ class TwitchStickersBot:
             bot.send_message(chat_id=chat_id, text=f"Sorry, I could not find a Twitch channel named '{msg}'")
             logging.log(logging.INFO, f"{msg} not found!")
 
+    def __soft_exit(self, signum, frame):
+        self.stop_bot()
+
     def start_bot(self):
         logging.log(logging.INFO, 'starting bot')
         self.updater.start_polling()
         self.updater.idle()
+
+    def stop_bot(self):
+        logging.log(logging.INFO, 'stopping bot')
+        self.updater.stop()
 
 
 if __name__ == '__main__':
     config = config_util.get_config()
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
     if config_util.token_key in config and config[config_util.token_key] is not '':
         bot = TwitchStickersBot(token=config[config_util.token_key])
         bot.start_bot()
