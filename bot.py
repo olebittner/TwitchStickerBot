@@ -2,7 +2,7 @@ import sys
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram import Sticker
 import logging
-from Utils import telegram_util, twitch_util
+from Utils import telegram_util, twitch_util, config_util
 
 
 class TwitchStickersBot:
@@ -47,7 +47,11 @@ class TwitchStickersBot:
 
 
 if __name__ == '__main__':
+    config = config_util.get_config()
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    bot = TwitchStickersBot(sys.argv[1])
-    bot.start_bot()
+    if config_util.token_key in config and config[config_util.token_key] is not '':
+        bot = TwitchStickersBot(token=config[config_util.token_key])
+        bot.start_bot()
+    else:
+        logging.log(logging.ERROR, f"{config_util.token_key} not in {config_util.config_path}!")
