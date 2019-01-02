@@ -20,7 +20,7 @@ class TwitchStickersBot:
 
     def __handle_start(self, bot, update):
         bot.send_message(chat_id=update.message.chat_id, text=f"Hi I'm the @TwitchStickersBot.\nSend me the name of "
-                            f"a Twitch Channel and I will send you a sticker set containing its emotes.")
+                         f"a Twitch Channel and I will send you a sticker set containing its emotes.")
 
     def __handle_message(self, bot, update):
         msg = update.message.text
@@ -28,6 +28,9 @@ class TwitchStickersBot:
         emotes = self.twitch_emotes.get_twitch_emotes(msg)
         if emotes is not None:
             if len(emotes) > 0:
+                bot.send_message(chat_id=chat_id, text=f"{msg} has {len(emotes)} emotes.\nI will now create your sticker "
+                                 f"set. This will take some time, up to a few minutes. Feel free to switch chats or "
+                                 f"close Telegram. I'll message you when your set is ready!")
                 name = f"{msg}_by_{bot.username}"
                 title = f"{msg} Twitch Emotes"
                 sticker_set = telegram_util.get_sticker_set(bot, name)
@@ -37,6 +40,10 @@ class TwitchStickersBot:
                                                            bot, sticker_set=sticker_set)
                 if isinstance(result, Sticker):
                     bot.send_sticker(chat_id=chat_id, sticker=result)
+                    bot.send_message(chat_id=chat_id, text="Your sticker set is ready. Tap or click on the sticker "
+                                                           "above this message to add it to your stickers!")
+                else:
+                    bot.send_message(chat_id=chat_id, text="Something went wrong during the creation of your set, sorry.")
             else:
                 bot.send_message(chat_id=chat_id,
                                  text=f"Sorry, it looks like '{msg}' has no emotes!")
