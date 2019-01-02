@@ -19,11 +19,12 @@ class TwitchStickersBot:
         self.twitch_emotes = twitch_util.TwitchEmoteRequester()
 
     def __handle_start(self, bot, update):
-        bot.send_message(chat_id=update.message.chat_id, text=f"I'm a bot, please talk to me!")
+        bot.send_message(chat_id=update.message.chat_id, text=f"Hi I'm the @TwitchStickersBot.\nSend me the name of "
+                            f"a Twitch Channel and I will send you a sticker set containing its emotes.")
 
     def __handle_message(self, bot, update):
         msg = update.message.text
-        chat_id = chat_id=update.message.chat_id
+        chat_id = update.message.chat_id
         emotes = self.twitch_emotes.get_twitch_emotes(msg)
         if emotes is not None:
             if len(emotes) > 0:
@@ -58,7 +59,7 @@ class TwitchStickersBot:
 
 if __name__ == '__main__':
     config = config_util.get_config()
-    logging.basicConfig(level=logging.DEBUG,
+    logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     if config_util.token_key in config and config[config_util.token_key] is not '':
