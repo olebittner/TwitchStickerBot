@@ -1,6 +1,6 @@
 import signal
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-from telegram import Sticker
+from telegram import Sticker, InlineKeyboardButton, InlineKeyboardMarkup
 import logging
 from Utils import telegram_util, twitch_util, config_util
 
@@ -41,7 +41,10 @@ class TwitchStickersBot:
                 if isinstance(result, Sticker):
                     bot.send_sticker(chat_id=chat_id, sticker=result)
                     bot.send_message(chat_id=chat_id, text="Your sticker set is ready. Tap or click on the sticker "
-                                                           "above this message to add it to your stickers!")
+                                                           "above this message to add it to your stickers!",
+                                     reply_markup=InlineKeyboardMarkup([[
+                                         InlineKeyboardButton(text=f"Subscribe to {msg} on Twitch",
+                                                              url=f"https://www.twitch.tv/subs/{msg}")]]))
                 else:
                     bot.send_message(chat_id=chat_id, text="Something went wrong during the creation of your set, sorry.")
             else:
