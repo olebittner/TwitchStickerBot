@@ -24,35 +24,39 @@ class TwitchStickersBot:
 
     def __handle_message(self, bot, update):
         msg = update.message.text
+        channel_name = twitch_util.extract_channel_name(msg)
         chat_id = update.message.chat_id
-        emotes = self.twitch_emotes.get_twitch_emotes(msg)
-        if emotes is not None:
-            if len(emotes) > 0:
-                bot.send_message(chat_id=chat_id, text=f"{msg} has {len(emotes)} emotes.\nI will now create your sticker "
-                                 f"set. This will take some time, up to a few minutes. Feel free to switch chats or "
-                                 f"close Telegram. I'll message you when your set is ready!")
-                name = f"{msg}_by_{bot.username}"
-                title = f"{msg} Twitch Emotes"
-                sticker_set = telegram_util.get_sticker_set(bot, name)
-                if sticker_set is not None:
-                    telegram_util.clear_sticker_set(bot, sticker_set)
-                result = telegram_util.create_sticker_pack(emotes, name, title, update.message.from_user.id,
-                                                           bot, sticker_set=sticker_set)
-                if isinstance(result, Sticker):
-                    bot.send_sticker(chat_id=chat_id, sticker=result)
-                    bot.send_message(chat_id=chat_id, text="Your sticker set is ready. Tap or click on the sticker "
-                                                           "above this message to add it to your stickers!",
-                                     reply_markup=InlineKeyboardMarkup([[
-                                         InlineKeyboardButton(text=f"Subscribe to {msg} on Twitch",
-                                                              url=f"https://www.twitch.tv/subs/{msg}")]]))
+        if channel_name:
+            emotes = self.twitch_emotes.get_twitch_emotes(channel_name)
+            if emotes is not None:
+                if len(emotes) > 0:
+                    bot.send_message(chat_id=chat_id, text=f"{channel_name} has {len(emotes)} emotes.\nI will now create your sticker "
+                                     f"set. This will take some time, up to a few minutes. Feel free to switch chats or "
+                                     f"close Telegram. I'll message you when your set is ready!")
+                    name = f"{channel_name}_by_{bot.username}"
+                    title = f"{channel_name} Twitch Emotes"
+                    sticker_set = telegram_util.get_sticker_set(bot, name)
+                    if sticker_set is not None:
+                        telegram_util.clear_sticker_set(bot, sticker_set)
+                    result = telegram_util.create_sticker_pack(emotes, name, title, update.message.from_user.id,
+                                                               bot, sticker_set=sticker_set)
+                    if isinstance(result, Sticker):
+                        bot.send_sticker(chat_id=chat_id, sticker=result)
+                        bot.send_message(chat_id=chat_id, text="Your sticker set is ready. Tap or click on the sticker "
+                                                               "above this message to add it to your stickers!",
+                                         reply_markup=InlineKeyboardMarkup([[
+                                             InlineKeyboardButton(text=f"Subscribe to {channel_name} on Twitch",
+                                                                  url=f"https://www.twitch.tv/subs/{channel_name}")]]))
+                    else:
+                        bot.send_message(chat_id=chat_id, text="Something went wrong during the creation of your set, sorry.")
                 else:
-                    bot.send_message(chat_id=chat_id, text="Something went wrong during the creation of your set, sorry.")
+                    bot.send_message(chat_id=chat_id,
+                                     text=f"Sorry, it looks like '{channel_name}' has no emotes!")
             else:
-                bot.send_message(chat_id=chat_id,
-                                 text=f"Sorry, it looks like '{msg}' has no emotes!")
+                bot.send_message(chat_id=chat_id, text=f"Sorry, I could not find a Twitch channel named '{channel_name}'")
+                logging.log(logging.DEBUG, f"{channel_name} not found!")
         else:
-            bot.send_message(chat_id=chat_id, text=f"Sorry, I could not find a Twitch channel named '{msg}'")
-            logging.log(logging.INFO, f"{msg} not found!")
+            bot.send_message(chat_id=chat_id, text=f"Whoopsie, that does not look like a channel name!")
 
     def __soft_exit(self, signum, frame):
         self.stop_bot()

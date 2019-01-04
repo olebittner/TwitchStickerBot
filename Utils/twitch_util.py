@@ -1,5 +1,6 @@
 import requests
 import logging
+import re
 from datetime import datetime, timedelta
 
 
@@ -28,3 +29,16 @@ class TwitchEmoteRequester:
                 for emote in details['emotes']:
                     emotes.append(f"https://static-cdn.jtvnw.net/emoticons/v1/{emote['id']}/3.0")
                 return emotes
+
+
+def extract_channel_name(text):
+    text = str(text).strip()
+
+    m = re.search(r'twitch.tv\/([\w]*)', text)
+    if m:
+        return m.groups()[0]
+
+    elif text.count(' ') == 0:
+        return text
+
+    return None
